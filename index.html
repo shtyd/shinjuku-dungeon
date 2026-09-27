@@ -1,0 +1,820 @@
+<title>新宿駅ナビゲーション</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --bg: #eef0ec;
+    --surface: #ffffff;
+    --surface-2: #e4e7e0;
+    --ink: #14213d;
+    --ink-soft: #4a5468;
+    --muted: #798199;
+    --board-bg: #0f1f3d;
+    --board-ink: #ffd400;
+    --board-ink-dim: #b7902e;
+    --rule: #d3d7cd;
+    --line-chuo: #e2611f;
+    --line-yamanote: #4f9a2c;
+    --line-sobu: #d1a300;
+    --line-marunouchi: #d4331a;
+    --line-odakyu: #0068a8;
+    --line-keio: #c73583;
+    --line-toei: #1f8f82;
+    --danger: #b23a2e;
+    --danger-bg: #f7e3df;
+    --ok: #2f7a3d;
+    --ok-bg: #dfeee0;
+    --shadow: 0 1px 2px rgba(20,33,61,.06), 0 6px 16px rgba(20,33,61,.08);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0b1526;
+      --surface: #141f38;
+      --surface-2: #1b2947;
+      --ink: #eef0ec;
+      --ink-soft: #b7c0d6;
+      --muted: #7c88a6;
+      --board-bg: #060d1c;
+      --board-ink: #ffd400;
+      --board-ink-dim: #7a611f;
+      --rule: #2a3555;
+      --line-chuo: #ff8a4c;
+      --line-yamanote: #7ecf55;
+      --line-sobu: #e6c23a;
+      --line-marunouchi: #ff6a4d;
+      --line-odakyu: #4fb2ec;
+      --line-keio: #ed7ab8;
+      --line-toei: #4fd0c1;
+      --danger: #ff8f7f;
+      --danger-bg: #3a2020;
+      --ok: #7ed894;
+      --ok-bg: #17301c;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 20px rgba(0,0,0,.35);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0b1526;
+    --surface: #141f38;
+    --surface-2: #1b2947;
+    --ink: #eef0ec;
+    --ink-soft: #b7c0d6;
+    --muted: #7c88a6;
+    --board-bg: #060d1c;
+    --board-ink: #ffd400;
+    --board-ink-dim: #7a611f;
+    --rule: #2a3555;
+    --line-chuo: #ff8a4c;
+    --line-yamanote: #7ecf55;
+    --line-sobu: #e6c23a;
+    --line-marunouchi: #ff6a4d;
+    --line-odakyu: #4fb2ec;
+    --line-keio: #ed7ab8;
+    --line-toei: #4fd0c1;
+    --danger: #ff8f7f;
+    --danger-bg: #3a2020;
+    --ok: #7ed894;
+    --ok-bg: #17301c;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 20px rgba(0,0,0,.35);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", sans-serif;
+    padding-inline: 16px;
+    padding-block: 20px 40px;
+    display: flex;
+    justify-content: center;
+  }
+  .wrap { width: 100%; max-width: 560px; display: flex; flex-direction: column; gap: 14px; }
+
+  h1, h2, h3 { font-family: "Zen Kaku Gothic New", "Noto Sans JP", sans-serif; margin: 0; text-wrap: balance; }
+
+  .title-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .title-row h1 { font-size: 1.25rem; font-weight: 900; letter-spacing: .01em; }
+  .title-row .subtitle { font-size: .72rem; color: var(--muted); }
+
+  .linebar {
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(90deg,
+      var(--line-chuo) 0 14.2%, var(--line-yamanote) 14.2% 28.4%,
+      var(--line-sobu) 28.4% 42.6%, var(--line-marunouchi) 42.6% 56.8%,
+      var(--line-odakyu) 56.8% 71%, var(--line-keio) 71% 85.2%,
+      var(--line-toei) 85.2% 100%);
+    flex: none;
+  }
+
+  /* departure board */
+  .board {
+    background: var(--board-bg);
+    border-radius: 14px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .board .label { font-size: .68rem; letter-spacing: .12em; color: var(--board-ink-dim); font-weight: 600; }
+  .board .dest {
+    font-family: "Zen Kaku Gothic New", sans-serif;
+    font-weight: 900;
+    font-size: clamp(1.15rem, 5vw, 1.5rem);
+    color: var(--board-ink);
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    text-wrap: balance;
+  }
+  .board .dest .blink { animation: blink 1.4s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .board .dest .blink { animation: none; } }
+  .board .dest-sub { font-size: .78rem; color: #cbd3e6; font-family: "Noto Sans JP", sans-serif; font-weight: 400; }
+
+  /* stats row */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .stat {
+    background: var(--surface);
+    border-radius: 10px;
+    padding: 8px 10px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .stat .k { font-size: .64rem; color: var(--muted); letter-spacing: .04em; }
+  .stat .v { font-size: 1rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink); }
+
+  /* breadcrumb line diagram */
+  .trail-scroll { overflow-x: auto; padding-block: 4px 2px; }
+  .trail {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    min-width: max-content;
+    padding-inline: 2px;
+  }
+  .trail .node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    width: 74px;
+    flex: none;
+  }
+  .trail .dot {
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--surface-2);
+    border: 2px solid var(--muted);
+    flex: none;
+  }
+  .trail .dot.deadend { background: var(--danger-bg); border-color: var(--danger); }
+  .trail .dot.exit { background: var(--ok-bg); border-color: var(--ok); }
+  .trail .dot.current { border-color: var(--ink); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ink) 18%, transparent); }
+  .trail .lbl { font-size: .6rem; color: var(--muted); text-align: center; line-height: 1.2; max-width: 74px; }
+  .trail .connector { width: 26px; height: 2px; background: var(--rule); flex: none; margin-bottom: 16px; }
+
+  /* current location card */
+  .here {
+    background: var(--surface);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border-left: 5px solid var(--accent, var(--ink));
+    display: flex;
+    flex-direction: column;
+  }
+  .here .photo-frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background: var(--surface-2);
+    overflow: hidden;
+  }
+  .here .photo-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .here .photo-credit {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    font-size: .62rem;
+    background: rgba(15,20,35,.55);
+    padding: 3px 7px;
+    border-radius: 6px;
+    line-height: 1.2;
+  }
+  .here .photo-credit a { color: #fff; text-decoration: none; }
+  .here .photo-credit a:hover { text-decoration: underline; }
+  .here .body { padding: 14px 18px 16px; display: flex; flex-direction: column; gap: 6px; }
+  .here .kind { font-size: .64rem; letter-spacing: .1em; color: var(--muted); font-weight: 600; }
+  .here .name { font-size: 1.1rem; font-weight: 700; font-family: "Zen Kaku Gothic New", sans-serif; text-wrap: balance; }
+  .here .sub { font-size: .76rem; color: var(--muted); font-style: italic; }
+  .here .flavor { font-size: .86rem; color: var(--ink-soft); line-height: 1.55; margin-top: 4px; }
+
+  .toast {
+    font-size: .78rem;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: var(--danger-bg);
+    color: var(--danger);
+    font-weight: 600;
+  }
+  .toast.info { background: var(--surface-2); color: var(--ink-soft); font-weight: 500; }
+
+  /* choices */
+  .choices { display: flex; flex-direction: column; gap: 8px; }
+  .choice {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface);
+    border: none;
+    border-left: 5px solid var(--c, var(--muted));
+    border-radius: 10px;
+    padding: 12px 14px;
+    box-shadow: var(--shadow);
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--ink);
+    transition: transform .12s ease;
+  }
+  .choice:hover { transform: translateX(2px); }
+  .choice:active { transform: translateX(0); }
+  .choice:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .choice .arrow { font-size: 1.1rem; font-weight: 700; color: var(--c, var(--muted)); flex: none; width: 1.2em; text-align: center; }
+  .choice .text { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
+  .choice .text .main { font-weight: 600; font-size: .92rem; }
+  .choice .text .romaji { font-size: .68rem; color: var(--muted); }
+  .choice.deadend-choice { border-left-color: var(--danger); }
+  .choice.deadend-choice .arrow { color: var(--danger); }
+
+  details.log { background: var(--surface); border-radius: 10px; box-shadow: var(--shadow); padding: 4px 14px; }
+  details.log summary { cursor: pointer; font-size: .8rem; font-weight: 600; padding-block: 8px; color: var(--ink-soft); }
+  .log-list { display: flex; flex-direction: column; gap: 6px; padding-bottom: 10px; max-height: 180px; overflow-y: auto; }
+  .log-list .entry { font-size: .74rem; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; border-top: 1px solid var(--rule); padding-top: 6px; }
+  .log-list .entry:first-child { border-top: none; padding-top: 0; }
+  .log-list .entry .t { font-variant-numeric: tabular-nums; flex: none; }
+
+  .legend { font-size: .66rem; color: var(--muted); text-align: center; padding-top: 2px; line-height: 1.6; }
+  .legend a { color: var(--muted); }
+
+  /* result modal */
+  .overlay {
+    position: fixed; inset: 0;
+    background: color-mix(in srgb, var(--board-bg) 78%, transparent);
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px;
+    z-index: 10;
+    overflow-y: auto;
+  }
+  .modal {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 24px 22px;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-block: auto;
+  }
+  .modal .photo-frame { width: 100%; aspect-ratio: 16/9; border-radius: 10px; overflow: hidden; background: var(--surface-2); }
+  .modal .photo-frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .modal .rank { font-family: "Zen Kaku Gothic New", sans-serif; font-weight: 900; font-size: 1.3rem; text-wrap: balance; }
+  .modal .rank-sub { font-size: .8rem; color: var(--muted); margin-top: -6px; }
+  .modal .result-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-block: 4px; }
+  .modal .result-stats .cell { background: var(--surface-2); border-radius: 10px; padding: 10px 12px; }
+  .modal .result-stats .cell .k { font-size: .64rem; color: var(--muted); }
+  .modal .result-stats .cell .v { font-size: 1.05rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .modal .best { font-size: .78rem; color: var(--ok); font-weight: 600; }
+  .modal .cta-row { display: flex; gap: 8px; margin-top: 4px; }
+
+  button.primary {
+    background: var(--ink);
+    color: var(--bg);
+    border: none;
+    border-radius: 9px;
+    padding: 11px 16px;
+    font-weight: 700;
+    font-size: .88rem;
+    cursor: pointer;
+    font-family: "Zen Kaku Gothic New", sans-serif;
+    flex: 1;
+  }
+  button.primary:hover { opacity: .9; }
+  button.ghost {
+    background: transparent;
+    color: var(--ink-soft);
+    border: 1px solid var(--rule);
+    border-radius: 9px;
+    padding: 11px 16px;
+    font-weight: 600;
+    font-size: .82rem;
+    cursor: pointer;
+  }
+</style>
+
+<div class="wrap">
+  <div class="title-row">
+    <h1>新宿駅ナビゲーション</h1>
+    <span class="subtitle">Shinjuku Station Wayfinder</span>
+  </div>
+  <div class="linebar" aria-hidden="true"></div>
+
+  <div class="board">
+    <span class="label">GOING TO / 目的地</span>
+    <div class="dest">
+      <span id="destName">—</span><span class="blink">:</span><span id="destBlank"></span>
+    </div>
+    <span class="dest-sub" id="destSub">周りの景色を頼りに、正しい方へ進もう</span>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><span class="k">経過(シミュレーション)</span><span class="v" id="statSim">00:00</span></div>
+    <div class="stat"><span class="k">実時間</span><span class="v" id="statReal">00:00</span></div>
+    <div class="stat"><span class="k">ミス歩数</span><span class="v" id="statMiss">0</span></div>
+  </div>
+
+  <div class="trail-scroll">
+    <div class="trail" id="trail"></div>
+  </div>
+
+  <div id="toastArea"></div>
+
+  <div class="here" id="hereCard">
+    <div class="photo-frame">
+      <img id="herePhoto" src="" alt="">
+      <div class="photo-credit"><a id="herePhotoCredit" href="#" target="_blank" rel="noopener">出典: Wikimedia Commons</a></div>
+    </div>
+    <div class="body">
+      <span class="kind" id="hereKind">現在地</span>
+      <div class="name" id="hereName">—</div>
+      <div class="sub" id="hereSub">—</div>
+      <div class="flavor" id="hereFlavor"></div>
+    </div>
+  </div>
+
+  <div class="choices" id="choices"></div>
+
+  <details class="log">
+    <summary>行動ログを見る</summary>
+    <div class="log-list" id="logList"></div>
+  </details>
+
+  <div class="legend">簡略化した案内図です。実際の新宿駅の正確な構内図ではありません。写真は各撮影者によるWikimedia Commons掲載の実写真(CC BY / CC BY-SA 等)を使用しています。出典は各写真下のリンクから確認できます。</div>
+</div>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="modal">
+    <div class="photo-frame"><img id="modalPhoto" src="" alt=""></div>
+    <span class="kind" id="modalKind" style="font-size:.68rem;color:var(--muted);letter-spacing:.08em;font-weight:600;">到着</span>
+    <div class="rank" id="modalRank">—</div>
+    <div class="rank-sub" id="modalRankSub"></div>
+    <div class="result-stats">
+      <div class="cell"><div class="k">シミュレーション時間</div><div class="v" id="modalSim">—</div></div>
+      <div class="cell"><div class="k">最短目安</div><div class="v" id="modalOptimal">—</div></div>
+      <div class="cell"><div class="k">移動回数</div><div class="v" id="modalMoves">—</div></div>
+      <div class="cell"><div class="k">ミス歩数</div><div class="v" id="modalMiss">—</div></div>
+    </div>
+    <div class="best" id="modalBest" hidden></div>
+    <div class="cta-row">
+      <button class="primary" id="btnReplay">次の行き先へ</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---- graph data --------------------------------------------------
+  // photo: local file shipped alongside this page (photos/<id>.jpg)
+  // page: the Wikimedia Commons file page the photo came from (for attribution)
+  // caption: describes what is actually visible in that photo
+  var N = {
+    p_chuo: { name: "中央線快速ホーム", sub: "Chūō Line Rapid Platform", kind: "platform", accent: "var(--line-chuo)",
+      photo: "photos/p_chuo.jpg", page: "https://commons.wikimedia.org/wiki/File:JR_Shinjuku_Station_Platform_5%E3%83%BB6_(20210410).jpg",
+      caption: "発車案内板とエスカレーターが見える。5番線・6番線のりばの表示だ。" },
+    p_yamanote: { name: "山手線ホーム", sub: "Yamanote Line Platform", kind: "platform", accent: "var(--line-yamanote)",
+      photo: "photos/p_yamanote.jpg", page: "https://commons.wikimedia.org/wiki/File:Shinjuku_Station_Yamanote_Line_platform_(39081838475).jpg",
+      caption: "緑色の電車がちょうど滑り込んできた。ホームは通勤客でいっぱいだ。" },
+    p_sobu: { name: "総武線各駅停車ホーム", sub: "Sōbu Line Local Platform", kind: "platform", accent: "var(--line-sobu)",
+      photo: "photos/p_sobu.jpg", page: "https://commons.wikimedia.org/wiki/File:Platform_of_Shinjuku_Station_(Yamanote_Line_%26_Chuo-Sobu_Line).JPG",
+      caption: "自販機の上の時計が目に入る。両側のホームに電車が停まっている。" },
+    p_marunouchi: { name: "丸ノ内線ホーム", sub: "Marunouchi Line Platform", kind: "platform", accent: "var(--line-marunouchi)",
+      photo: "photos/p_marunouchi.jpg", page: "https://commons.wikimedia.org/wiki/File:Shinjuku-Sta-Marunouchi-Line-Platform.JPG",
+      caption: "「池袋」「荻窪」の案内表示が並ぶ、丸い天井の地下鉄ホームだ。" },
+    p_odakyu: { name: "小田急線ホーム", sub: "Odakyu Line Platform", kind: "platform", accent: "var(--line-odakyu)",
+      photo: "photos/p_odakyu.jpg", page: "https://commons.wikimedia.org/wiki/File:Odakyu-Shinjuku-STA_Home6.jpg",
+      caption: "「6 降車専用 Arrivals Only」の看板の下に、小田急の車両が停まっている。" },
+    p_keio: { name: "京王線ホーム", sub: "Keio Line Platform", kind: "platform", accent: "var(--line-keio)",
+      photo: "photos/p_keio.jpg", page: "https://commons.wikimedia.org/wiki/File:Keio_Shinjuku_Station_(53317478560).jpg",
+      caption: "KEIOの運賃表と路線図が壁いっぱいに掲示されている。" },
+    p_toei: { name: "都営地下鉄ホーム", sub: "Toei Subway Platform", kind: "platform", accent: "var(--line-toei)",
+      photo: "photos/p_toei.jpg", page: "https://commons.wikimedia.org/wiki/File:Toei-Oedo-line_Shinjuku-STA_Platform.jpg",
+      caption: "青い柱が並ぶ、地下深くのホームだ。発車案内が光っている。" },
+
+    C_JR: { name: "JRコンコースの大型ビジョン", sub: "JR Concourse — Digital Wall", kind: "hub", accent: "var(--ink)",
+      photo: "photos/C_JR.jpg", page: "https://commons.wikimedia.org/wiki/File:Shinjuku-Wall-456.jpg",
+      caption: "壁一面の巨大デジタルサイネージ「新宿ウォール456」が視界を覆っている。" },
+    D_lockers: { name: "コインロッカーの前(行き止まり)", sub: "Coin Lockers — Dead End", kind: "deadend", accent: "var(--danger)",
+      photo: "photos/D_lockers.jpg", page: "https://commons.wikimedia.org/wiki/File:Coin-Locker_Japan_1.jpg",
+      caption: "100円コインロッカーがずらりと並んでいる。この先に道はない。" },
+    G_chuo: { name: "発車案内板の前", sub: "Departure Board", kind: "gate", accent: "var(--line-chuo)",
+      photo: "photos/G_chuo.jpg", page: "https://commons.wikimedia.org/wiki/File:Electronic_signage_of_Shinjuku_Station.JPG",
+      caption: "黒い発車標に列車の時刻がずらりと表示され、改札口が見えている。" },
+    G_higashi: { name: "東改札付近", sub: "Higashi (East) Gate area", kind: "gate", accent: "var(--ok)",
+      photo: "photos/G_higashi.jpg", page: "https://commons.wikimedia.org/wiki/File:JR_Shinjuku_Station.JPG",
+      caption: "「新宿駅」の緑のロゴが壁に掲げられている。東口方面の出入口だ。" },
+    G_minami: { name: "南改札付近", sub: "Minami (South) Gate area", kind: "gate", accent: "var(--ok)",
+      photo: "photos/G_minami.jpg", page: "https://commons.wikimedia.org/wiki/File:JR-East-Shinjuku-Station-South.jpg",
+      caption: "「JR新宿駅」とルミネの看板が頭上に並ぶ、南側の出入口だ。" },
+    G_shinminami: { name: "新南改札付近", sub: "Shin-Minami Gate area", kind: "gate", accent: "var(--ok)",
+      photo: "photos/G_shinminami.jpg", page: "https://commons.wikimedia.org/wiki/File:Shinjuku_station_Southern-terrace_entrance.jpg",
+      caption: "「Shinjuku Station サザンテラス口」の表示。奥に高層ビルが見える。" },
+    G_nishi: { name: "西改札付近", sub: "Nishi (West) Gate area", kind: "gate", accent: "var(--ok)",
+      photo: "photos/G_nishi.jpg", page: "https://commons.wikimedia.org/wiki/File:Shinjuku_Station_West_Exit.jpg",
+      caption: "発車案内板が並ぶ広いコンコース。人の流れが途切れない。" },
+    G_marunouchi: { name: "地上出入口の看板前", sub: "Ground-level Entrance", kind: "gate", accent: "var(--line-marunouchi)",
+      photo: "photos/G_marunouchi.jpg", page: "https://commons.wikimedia.org/wiki/File:Odakyu-Shinjuku-STA_West-ground-entrance.jpg",
+      caption: "地上へ続く出入口に、いくつもの案内看板が並んでいる。" },
+    G_odakyu: { name: "小田急線 西口地下改札", sub: "Odakyu West Underground Gate", kind: "gate", accent: "var(--line-odakyu)",
+      photo: "photos/G_odakyu.jpg", page: "https://commons.wikimedia.org/wiki/File:Odakyu_Shinjuku-STA_West-Underground-Gate.jpg",
+      caption: "「ODAKYU Line Entrance / West Underground Gate」の案内と自動改札機が並ぶ。" },
+    G_keio: { name: "京王線改札付近", sub: "Keio Line Gate area", kind: "gate", accent: "var(--line-keio)",
+      photo: "photos/G_keio.jpg", page: "https://commons.wikimedia.org/wiki/File:Keio-Shinjuku-STA_Keio-Department-store-entrance.jpg",
+      caption: "青地に「KEIO 新宿駅」の看板。地下へ続く階段の脇に店が並ぶ。" },
+    G_toei: { name: "都営地下鉄口", sub: "Toei Subway Entrance", kind: "gate", accent: "var(--line-toei)",
+      photo: "photos/G_toei.jpg", page: "https://commons.wikimedia.org/wiki/File:Nishishinjuku_1-1_240216.jpg",
+      caption: "「京王新線・都営新宿線(S)・都営大江戸線(E27)」と書かれた案内板が階段口に掲げられている。" },
+
+    C_underground: { name: "地下街の通路", sub: "Underground Arcade", kind: "hub", accent: "var(--ink)",
+      photo: "photos/C_underground.jpg", page: "https://commons.wikimedia.org/wiki/File:Shinjuku-plaza.JPG",
+      caption: "洋服店の前を通る、地下街の通路に出た。" },
+    D_infoCenter: { name: "小雨の窓際(行き止まり)", sub: "Dead End by a Window", kind: "deadend", accent: "var(--danger)",
+      photo: "photos/D_infoCenter.jpg", page: "https://commons.wikimedia.org/wiki/File:Shinjuku_20070717150616_(8675653420).jpg",
+      caption: "窓の外に小田急百貨店のビルが小雨に霞んで見えるだけの、行き止まりの踊り場だ。" },
+    C_underground_west: { name: "西口地下改札前の広場", sub: "West Underground Gate Area", kind: "hub", accent: "var(--ink)",
+      photo: "photos/C_underground_west.jpg", page: "https://commons.wikimedia.org/wiki/File:OER_Shinjuku_station_West_Underground.jpg",
+      caption: "「小田急 西口地下改札口」の案内と自動改札が並ぶ、広めの通路だ。" },
+    D_infoCenter2: { name: "曇り空の窓際(行き止まり)", sub: "Dead End by a Window", kind: "deadend", accent: "var(--danger)",
+      photo: "photos/D_infoCenter2.jpg", page: "https://commons.wikimedia.org/wiki/File:Shinjuku_2018_(39289966975).jpg",
+      caption: "窓の外に京王百貨店の看板が見えるだけの、行き止まりの踊り場だ。" },
+
+    X_higashiguchi: { name: "東口(スタジオアルタ前)", sub: "Higashi-guchi / Studio Alta", kind: "exit", accent: "var(--ok)",
+      photo: "photos/X_higashiguchi.jpg", page: "https://commons.wikimedia.org/wiki/File:Studio_Alta_Shinjuku_2014_Mar_(200771066).jpg",
+      caption: "巨大なビジョンを掲げた「STUDIO ALTA」の建物が目の前にそびえている。" },
+    X_kabukicho: { name: "歌舞伎町一番街入口", sub: "Kabukicho Ichibangai Gate", kind: "exit", accent: "var(--ok)",
+      photo: "photos/X_kabukicho.jpg", page: "https://commons.wikimedia.org/wiki/File:Gate_of_Kabuki-cho_Ichiban-gai.jpg",
+      caption: "赤いアーチ状のゲートに「歌舞伎町一番街」の文字が輝いている。" },
+    X_minami: { name: "南口(バスタ新宿)", sub: "Minami-guchi / Busta Shinjuku", kind: "exit", accent: "var(--ok)",
+      photo: "photos/X_minami.jpg", page: "https://commons.wikimedia.org/wiki/File:Shinjuku_expressway_bus_terminal.jpg",
+      caption: "「JR BUS KANTO」の高速バスが発着している。頭上の案内板に行き先が並ぶ。" },
+    X_shinminami: { name: "新南口(サザンテラス)", sub: "Shin-Minami / Southern Terrace", kind: "exit", accent: "var(--ok)",
+      photo: "photos/X_shinminami.jpg", page: "https://commons.wikimedia.org/wiki/File:Southern_Terrace,_Shinjuku_Station,_Shinjuku_(43473774074).jpg",
+      caption: "タカシマヤタイムズスクエアと、時計塔のあるビルが並ぶ開放的なデッキに出た。" },
+    X_nishiguchi_omoide: { name: "思い出横丁(西口ガード下)", sub: "Omoide Yokocho", kind: "exit", accent: "var(--ok)",
+      photo: "photos/X_nishiguchi_omoide.jpg", page: "https://commons.wikimedia.org/wiki/File:Shinjuku_omoide_yokocho_2009.JPG",
+      caption: "緑のネオン看板「思い出横丁」の下に、飲み屋の並ぶ路地が続いている。" },
+    X_tocho: { name: "都庁第一庁舎方面", sub: "Tokyo Metro. Govt. Bldg No.1", kind: "exit", accent: "var(--ok)",
+      photo: "photos/X_tocho.jpg", page: "https://commons.wikimedia.org/wiki/File:Tokyo_Metropolitan_Government_Building_No.1_-_Shinjuku,_Tokyo_-_DSC05442.jpg",
+      caption: "双子の塔がそびえる東京都庁第一本庁舎が、街路樹の向こうに現れた。" },
+    X_odakyu_dept: { name: "小田急百貨店前", sub: "Odakyu Department Store", kind: "exit", accent: "var(--ok)",
+      photo: "photos/X_odakyu_dept.jpg", page: "https://commons.wikimedia.org/wiki/File:Odakyu-Department-Store_Shinjuku-Store.jpg",
+      caption: "オレンジ色のタワーに「ODAKYU」のロゴ。小田急百貨店の建物が見えている。" }
+  };
+
+  // undirected edges: [a, b, labelAB, romajiAB, labelBA, romajiBA, cost]
+  var E = [
+    ["p_chuo","C_JR","中央コンコースへ","To Central Concourse","中央線ホームへ戻る","Back to platform",70],
+    ["p_yamanote","C_JR","中央コンコースへ","To Central Concourse","山手線ホームへ戻る","Back to platform",65],
+    ["p_sobu","C_JR","中央コンコースへ","To Central Concourse","総武線ホームへ戻る","Back to platform",75],
+    ["p_marunouchi","G_marunouchi","地上出入口へ","To ground entrance","丸ノ内線ホームへ戻る","Back to platform",90],
+    ["p_odakyu","G_odakyu","西口地下改札へ","To West Underground Gate","小田急線ホームへ戻る","Back to platform",55],
+    ["p_keio","G_keio","京王線改札へ","To Keio Gate","京王線ホームへ戻る","Back to platform",50],
+    ["p_toei","G_toei","都営地下鉄口へ","To Toei Subway Entrance","都営地下鉄ホームへ戻る","Back to platform",100],
+
+    ["C_JR","D_lockers","コインロッカーの案内板を見る","Check locker map","コンコースへ戻る","Back to concourse",20],
+    ["C_JR","G_chuo","中央改札方面へ","Toward Chūō Gate","コンコースへ戻る","Back to concourse",40],
+    ["C_JR","G_higashi","東改札方面へ","Toward Higashi Gate","コンコースへ戻る","Back to concourse",45],
+    ["C_JR","G_minami","南改札方面へ","Toward Minami Gate","コンコースへ戻る","Back to concourse",50],
+    ["C_JR","G_shinminami","新南改札方面へ","Toward Shin-Minami Gate","コンコースへ戻る","Back to concourse",55],
+    ["C_JR","G_nishi","西改札方面へ","Toward Nishi Gate","コンコースへ戻る","Back to concourse",60],
+
+    ["G_chuo","X_higashiguchi","東口へ出る","Exit to Higashi-guchi","改札内へ戻る","Back inside gate",30],
+    ["G_chuo","C_underground","地下通路へ","To underground passage","中央改札方面へ戻る","Back toward Chūō Gate",35],
+    ["G_higashi","X_higashiguchi","東口へ出る","Exit to Higashi-guchi","改札内へ戻る","Back inside gate",20],
+    ["G_higashi","C_underground","地下通路へ","To underground passage","東改札方面へ戻る","Back toward Higashi Gate",25],
+    ["G_minami","X_minami","南口へ出る","Exit to Minami-guchi","改札内へ戻る","Back inside gate",25],
+    ["G_minami","C_underground","地下通路へ","To underground passage","南改札方面へ戻る","Back toward Minami Gate",40],
+    ["G_shinminami","X_shinminami","新南口へ出る","Exit to Shin-Minami-guchi","改札内へ戻る","Back inside gate",20],
+    ["G_nishi","C_underground_west","西口地下広場へ","To West underground area","西改札方面へ戻る","Back toward Nishi Gate",30],
+    ["G_nishi","X_tocho","都庁方面へ出る","Exit toward Tochō","改札内へ戻る","Back inside gate",45],
+
+    ["G_marunouchi","C_underground","地下通路へ","To underground passage","丸ノ内線改札方面へ戻る","Back toward Marunouchi Gate",50],
+
+    ["G_odakyu","X_odakyu_dept","小田急百貨店口へ出る","Exit to Odakyu store","改札内へ戻る","Back inside gate",20],
+    ["G_odakyu","C_underground_west","西口地下広場へ","To West underground area","小田急線改札方面へ戻る","Back toward Odakyu Gate",35],
+
+    ["G_keio","X_minami","南口(バスタ)方面へ出る","Exit toward Busta Shinjuku","改札内へ戻る","Back inside gate",30],
+    ["G_keio","C_underground","地下通路へ","To underground passage","京王線改札方面へ戻る","Back toward Keio Gate",45],
+
+    ["G_toei","C_underground","地下通路へ","To underground passage","都営地下鉄口方面へ戻る","Back toward Toei entrance",60],
+    ["G_toei","X_minami","南口方面へ出る","Exit toward Minami-guchi","改札内へ戻る","Back inside gate",50],
+
+    ["C_underground","X_higashiguchi","東口へ出る","Exit to Higashi-guchi","地下通路へ戻る","Back to passage",30],
+    ["C_underground","X_kabukicho","歌舞伎町一番街へ","To Kabukicho Ichibangai","地下通路へ戻る","Back to passage",45],
+    ["C_underground","D_infoCenter","窓際を覗く","Peek by the window","地下通路へ戻る","Back to passage",15],
+    ["C_underground","C_underground_west","西口地下広場へ","To West underground area","東口地下通路へ戻る","Back to East passage",50],
+
+    ["C_underground_west","X_nishiguchi_omoide","思い出横丁へ","To Omoide Yokocho","西口地下広場へ戻る","Back to West area",25],
+    ["C_underground_west","X_tocho","都庁方面へ出る","Exit toward Tochō","西口地下広場へ戻る","Back to West area",40],
+    ["C_underground_west","X_odakyu_dept","小田急百貨店口へ","To Odakyu store entrance","西口地下広場へ戻る","Back to West area",30],
+    ["C_underground_west","D_infoCenter2","窓際を覗く","Peek by the window","西口地下広場へ戻る","Back to West area",15]
+  ];
+
+  var neighbors = {};
+  Object.keys(N).forEach(function (k) { neighbors[k] = []; });
+  E.forEach(function (e) {
+    var a = e[0], b = e[1];
+    neighbors[a].push({ to: b, label: e[2], sub: e[3], cost: e[6] });
+    neighbors[b].push({ to: a, label: e[4], sub: e[5], cost: e[6] });
+  });
+
+  var KIND_LABEL = { platform: "プラットホーム", gate: "改札・出入口", hub: "連絡通路", exit: "出口", deadend: "行き止まり" };
+
+  var startIds = Object.keys(N).filter(function (k) { return N[k].kind === "platform"; });
+  var destIds  = Object.keys(N).filter(function (k) { return N[k].kind === "exit"; });
+
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+  function bfsCost(startId, goalId) {
+    var dist = {}; dist[startId] = 0;
+    var queue = [startId];
+    while (queue.length) {
+      var cur = queue.shift();
+      if (cur === goalId) return dist[cur];
+      neighbors[cur].forEach(function (nb) {
+        var d = dist[cur] + nb.cost;
+        if (dist[nb.to] === undefined || d < dist[nb.to]) { dist[nb.to] = d; queue.push(nb.to); }
+      });
+    }
+    return dist[goalId];
+  }
+
+  function fmtTime(sec) {
+    sec = Math.max(0, Math.round(sec));
+    var m = Math.floor(sec / 60), s = sec % 60;
+    return String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+  }
+
+  // ---- state ---------------------------------------------------------
+  var state = null;
+
+  function newGame() {
+    var startId = pick(startIds);
+    var destId = pick(destIds);
+    state = {
+      startId: startId,
+      destId: destId,
+      current: startId,
+      visited: [startId],
+      simTime: 0,
+      wrongTurns: 0,
+      moves: 0,
+      realStart: performance.now(),
+      log: [],
+      optimal: bfsCost(startId, destId),
+      finished: false
+    };
+    els.overlay.hidden = true;
+    render();
+    tickReal();
+  }
+
+  var realTimer = null;
+  function tickReal() {
+    clearInterval(realTimer);
+    realTimer = setInterval(function () {
+      if (!state || state.finished) return;
+      els.statReal.textContent = fmtTime((performance.now() - state.realStart) / 1000);
+    }, 500);
+  }
+
+  function addLog(text, t) {
+    state.log.unshift({ text: text, t: fmtTime(t) });
+  }
+
+  function move(edge) {
+    if (state.finished) return;
+    var cost = edge.cost;
+    var crowded = Math.random() < 0.3;
+    var crowdExtra = 0;
+    if (crowded) crowdExtra = 10 + Math.floor(Math.random() * 30);
+
+    state.simTime += cost + crowdExtra;
+    state.moves += 1;
+    state.current = edge.to;
+    state.visited.push(edge.to);
+
+    var toNode = N[edge.to];
+    addLog(edge.label + (crowded ? "(混雑あり)" : ""), state.simTime);
+    if (toNode.kind === "deadend") state.wrongTurns += 1;
+    if (toNode.kind === "exit" && edge.to !== state.destId) state.wrongTurns += 1;
+
+    render();
+    showToast(crowded, cost, crowdExtra);
+
+    if (edge.to === state.destId) finish();
+  }
+
+  var toastTimer = null;
+  function showToast(crowded, cost, extra) {
+    var area = els.toastArea;
+    area.innerHTML = "";
+    if (crowded) {
+      var d = document.createElement("div");
+      d.className = "toast";
+      d.textContent = "混雑のため足止め: +" + extra + "秒(移動 " + cost + "秒 + 混雑 " + extra + "秒)";
+      area.appendChild(d);
+    } else {
+      var d2 = document.createElement("div");
+      d2.className = "toast info";
+      d2.textContent = "移動: " + cost + "秒";
+      area.appendChild(d2);
+    }
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { area.innerHTML = ""; }, 3200);
+  }
+
+  function rankFor(wrongTurns, ratio) {
+    if (wrongTurns === 0 && ratio <= 1.15) return ["エキスパート乗換ナビゲーター", "一度も迷わず最短級のルートで到着。新宿駅を完全に掌握している。"];
+    if (wrongTurns <= 2 && ratio <= 1.6) return ["新宿駅利用歴3年", "多少の寄り道はあったが、危なげなく目的地に到着。"];
+    if (wrongTurns <= 5) return ["地方から来た人", "案内板を頼りに何とか辿り着いた。次はもっとスムーズに。"];
+    return ["完全に迷子", "コインロッカーと行き止まりを何度も往復した末の到着。お疲れさま。"];
+  }
+
+  function finish() {
+    state.finished = true;
+    clearInterval(realTimer);
+    var ratio = state.simTime / Math.max(1, state.optimal);
+    var rank = rankFor(state.wrongTurns, ratio);
+    var destNode = N[state.destId];
+
+    els.modalPhoto.src = destNode.photo;
+    els.modalPhoto.alt = destNode.name;
+    els.modalRank.textContent = rank[0];
+    els.modalRankSub.textContent = rank[1];
+    els.modalSim.textContent = fmtTime(state.simTime);
+    els.modalOptimal.textContent = fmtTime(state.optimal);
+    els.modalMoves.textContent = state.moves + "回";
+    els.modalMiss.textContent = state.wrongTurns + "回";
+
+    var bestKey = "shinjuku-navi-best-" + state.destId;
+    var bestEl = els.modalBest;
+    try {
+      var prevBest = localStorage.getItem(bestKey);
+      var prev = prevBest ? parseFloat(prevBest) : null;
+      if (prev === null || state.simTime < prev) {
+        localStorage.setItem(bestKey, String(state.simTime));
+        bestEl.hidden = false;
+        bestEl.style.color = "var(--ok)";
+        bestEl.textContent = prev === null ? "この行き先の自己ベストを記録!" : "自己ベスト更新! (" + fmtTime(prev) + " → " + fmtTime(state.simTime) + ")";
+      } else {
+        bestEl.hidden = false;
+        bestEl.style.color = "var(--muted)";
+        bestEl.textContent = "自己ベスト: " + fmtTime(prev);
+      }
+    } catch (e) { bestEl.hidden = true; }
+
+    els.overlay.hidden = false;
+  }
+
+  // ---- render ---------------------------------------------------------
+  var els = {};
+  function cacheEls() {
+    ["destName","destSub","statSim","statReal","statMiss","trail","toastArea",
+     "hereCard","herePhoto","herePhotoCredit","hereKind","hereName","hereSub","hereFlavor","choices","logList",
+     "overlay","modalPhoto","modalKind","modalRank","modalRankSub","modalSim","modalOptimal",
+     "modalMoves","modalMiss","modalBest","btnReplay"
+    ].forEach(function (id) { els[id] = document.getElementById(id); });
+  }
+
+  function render() {
+    var destNode = N[state.destId];
+    els.destName.textContent = destNode.name;
+    els.destSub.textContent = destNode.sub + " まで、周りの景色を見て進もう";
+
+    els.statSim.textContent = fmtTime(state.simTime);
+    els.statReal.textContent = fmtTime((performance.now() - state.realStart) / 1000);
+    els.statMiss.textContent = String(state.wrongTurns);
+
+    // trail
+    els.trail.innerHTML = "";
+    state.visited.forEach(function (id, i) {
+      if (i > 0) {
+        var conn = document.createElement("div");
+        conn.className = "connector";
+        els.trail.appendChild(conn);
+      }
+      var node = N[id];
+      var wrap = document.createElement("div");
+      wrap.className = "node";
+      var dot = document.createElement("div");
+      var cls = "dot";
+      if (node.kind === "deadend") cls += " deadend";
+      else if (node.kind === "exit") cls += " exit";
+      if (i === state.visited.length - 1) cls += " current";
+      dot.className = cls;
+      var lbl = document.createElement("div");
+      lbl.className = "lbl";
+      lbl.textContent = node.name.length > 10 ? node.name.slice(0, 9) + "…" : node.name;
+      wrap.appendChild(dot);
+      wrap.appendChild(lbl);
+      els.trail.appendChild(wrap);
+    });
+    els.trail.parentElement.scrollLeft = els.trail.scrollWidth;
+
+    // here card
+    var here = N[state.current];
+    els.hereCard.style.setProperty("--accent", here.accent);
+    els.herePhoto.src = here.photo;
+    els.herePhoto.alt = here.name;
+    els.herePhotoCredit.href = here.page;
+    els.hereKind.textContent = KIND_LABEL[here.kind] + (state.current === state.destId ? " · 目的地" : "");
+    els.hereName.textContent = here.name;
+    els.hereSub.textContent = here.sub;
+    els.hereFlavor.textContent = here.caption;
+
+    // choices
+    els.choices.innerHTML = "";
+    var opts = neighbors[state.current];
+    opts.forEach(function (edge) {
+      var btn = document.createElement("button");
+      var toNode = N[edge.to];
+      btn.className = "choice" + (toNode.kind === "deadend" ? " deadend-choice" : "");
+      btn.style.setProperty("--c", toNode.accent);
+      var arrow = document.createElement("span");
+      arrow.className = "arrow";
+      arrow.textContent = toNode.kind === "deadend" ? "×" : "→";
+      var text = document.createElement("span");
+      text.className = "text";
+      var main = document.createElement("span");
+      main.className = "main";
+      main.textContent = edge.label;
+      var romaji = document.createElement("span");
+      romaji.className = "romaji";
+      romaji.textContent = edge.sub;
+      text.appendChild(main);
+      text.appendChild(romaji);
+      btn.appendChild(arrow);
+      btn.appendChild(text);
+      btn.addEventListener("click", function () { move(edge); });
+      els.choices.appendChild(btn);
+    });
+
+    // log
+    els.logList.innerHTML = "";
+    if (state.log.length === 0) {
+      var empty = document.createElement("div");
+      empty.className = "entry";
+      empty.innerHTML = "<span>まだ移動していません</span>";
+      els.logList.appendChild(empty);
+    } else {
+      state.log.forEach(function (entry) {
+        var row = document.createElement("div");
+        row.className = "entry";
+        var txt = document.createElement("span");
+        txt.textContent = entry.text;
+        var t = document.createElement("span");
+        t.className = "t";
+        t.textContent = entry.t;
+        row.appendChild(txt);
+        row.appendChild(t);
+        els.logList.appendChild(row);
+      });
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    cacheEls();
+    els.btnReplay.addEventListener("click", newGame);
+    newGame();
+  });
+})();
+</script>
